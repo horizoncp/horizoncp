@@ -1,0 +1,29 @@
+Vagrant.configure("2") do |config|
+  # Use Debian 12 official box
+  config.vm.box = "debian/bookworm64"
+
+  # Set VM resources
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"
+    vb.cpus = 4
+  end
+
+  # Set up network
+  config.vm.network "private_network", type: "dhcp"
+
+  # Configure port forwarding
+  config.vm.network "forwarded_port", guest: 80, host: 9090
+  config.vm.network "forwarded_port", guest: 443, host: 9091
+
+  # Define provisioning steps
+
+  config.vm.provision "shell", name: "install-dependencies", path: "install-dependencies.sh"
+  config.vm.provision "shell", name: "database", path: "mysql.sh"
+  config.vm.provision "shell", name: "clone repo", path: "clone.sh"
+  config.vm.provision "shell", name: "SSL", path: "ssl.sh"
+  config.vm.provision "shell", name: "nginx", path: "nginx.sh"
+  config.vm.provision "shell", name: "supervisor", path: "supervisor.sh"
+  config.vm.provision "shell", inline: <<-SHELL
+    echo "HorizonCP environment setup complete!"
+  SHELL
+end
